@@ -31,60 +31,64 @@ start_data = {"Date":["0"],"Temperature":["0"],"Soil Moisture":["0"],"Humidity":
 df = pandas.DataFrame(data=start_data,columns=["Date","Temperature","Soil Moisture","Humidity","LDR","Pump"])
 
 def dht():
-
     global humidity
     global temp
 
-    result = instance.read()
-    if result.temperature == 0:
+    while True:
+
         result = instance.read()
-    else:
-        temp = str(result.temperature) + "C"
-        humidity = "%" + str(result.humidity)
-    time.sleep(5)
+        if result.temperature == 0:
+            result = instance.read()
+        else:
+            temp = str(result.temperature) + "C"
+            humidity = "%" + str(result.humidity)
+        time.sleep(5)
 
     
 def converter(wait_time):
     global soil_moisture
+    while True:
+        
 
-    bus.write_byte(address,A2) #A2 İnput soil moisture
-    value = bus.read_byte(address)
-    soil_moisture = 100-(value*100/255)
-    time.sleep(wait_time)
+        bus.write_byte(address,A2) #A2 İnput soil moisture
+        value = bus.read_byte(address)
+        soil_moisture = 100-(value*100/255)
+        time.sleep(wait_time)
 
-    global LDR
-    bus.write_byte(address,A0)#LDR input
-    LDR = bus.read_byte(address)
+        global LDR
+        bus.write_byte(address,A0)#LDR input
+        LDR = bus.read_byte(address)
 
 def water_pump(soil_moisture):
     global wait_time
-
-    if soil_moisture < 60:
-        wait_time = 0.1
-        GPIO.output(5, GPIO.HIGH)
-        GPIO.output(6, GPIO.LOW)
-        if soil_moisture > 75:
-            GPIO.output(5, GPIO.LOW)
+    while True:
+        if soil_moisture < 60:
+            wait_time = 0.1
+            GPIO.output(5, GPIO.HIGH)
             GPIO.output(6, GPIO.LOW)
-            wait_time = 3
+            if soil_moisture > 75:
+                GPIO.output(5, GPIO.LOW)
+                GPIO.output(6, GPIO.LOW)
+                wait_time = 3
 
 
 def data_collector(df,humidity,temp,soil_moisture,LDR,wait_time):
-    now = datetime.datetime.now()
-    date = datetime.datetime.strftime(now,'%x %X')
-    if wait_time == 0.1:
-        pump_key = 1
-    else :
-        pump_key = 0
+    while True:
+        now = datetime.datetime.now()
+        date = datetime.datetime.strftime(now,'%x %X')
+        if wait_time == 0.1:
+            pump_key = 1
+        else :
+            pump_key = 0
 
 
-    dataset = {"Date":[date],"Temperature":[temp],"Soil Moisture":[soil_moisture],"Humidity":[humidity],"LDR":[LDR],"Pump":[pump_key]}
-    
-    df2 = pandas.DataFrame(data=dataset,columns=["Date","Temperature","Soil Moisture","Humidity","LDR","Pump"])
-    df = pandas.concat([df,df2])
-    df.to_csv("dataset.cvs")
-    del dataset
-    time.sleep(10)
+        dataset = {"Date":[date],"Temperature":[temp],"Soil Moisture":[soil_moisture],"Humidity":[humidity],"LDR":[LDR],"Pump":[pump_key]}
+        
+        df2 = pandas.DataFrame(data=dataset,columns=["Date","Temperature","Soil Moisture","Humidity","LDR","Pump"])
+        df = pandas.concat([df,df2])
+        df.to_csv("dataset.cvs")
+        del dataset
+        time.sleep(10)
 
 
 
