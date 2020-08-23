@@ -26,6 +26,12 @@ bus = smbus.SMBus(1)
 GPIO.setup(5, GPIO.OUT)
 GPIO.setup(6, GPIO.OUT)
 
+#experimently
+soil_moisture = 75 
+wait_time = 3
+humidity = 30
+
+
 #collector
 start_data = {"Date":["0"],"Temperature":["0"],"Soil Moisture":["0"],"Humidity":["0"],"LDR":["0"],"Pump":["0"]}
 df = pandas.DataFrame(data=start_data,columns=["Date","Temperature","Soil Moisture","Humidity","LDR","Pump"])
@@ -55,9 +61,9 @@ def converter(wait_time):
         soil_moisture = 100-(value*100/255)
         time.sleep(wait_time)
 
-        global LDR
+        global ldr
         bus.write_byte(address,A0)#LDR input
-        LDR = bus.read_byte(address)
+        ldr = bus.read_byte(address)
 
 def water_pump(soil_moisture):
     global wait_time
@@ -72,7 +78,7 @@ def water_pump(soil_moisture):
                 wait_time = 3
 
 
-def data_collector(df,humidity,temp,soil_moisture,LDR,wait_time):
+def data_collector(df,humidity,temp,soil_moisture,ldr,wait_time):
     while True:
         now = datetime.datetime.now()
         date = datetime.datetime.strftime(now,'%x %X')
@@ -82,7 +88,7 @@ def data_collector(df,humidity,temp,soil_moisture,LDR,wait_time):
             pump_key = 0
 
 
-        dataset = {"Date":[date],"Temperature":[temp],"Soil Moisture":[soil_moisture],"Humidity":[humidity],"LDR":[LDR],"Pump":[pump_key]}
+        dataset = {"Date":[date],"Temperature":[temp],"Soil Moisture":[soil_moisture],"Humidity":[humidity],"LDR":[ldr],"Pump":[pump_key]}
         
         df2 = pandas.DataFrame(data=dataset,columns=["Date","Temperature","Soil Moisture","Humidity","LDR","Pump"])
         df = pandas.concat([df,df2])
@@ -90,8 +96,20 @@ def data_collector(df,humidity,temp,soil_moisture,LDR,wait_time):
         del dataset
         time.sleep(10)
 
+t1 = threading.Thread(target=dht)
+t3 = threading.Thread(target=water_pump, args=soil_moisture,)
+t2 = threading.Thread(target=converter, args= wait_time,)
+#t4 = threading.Thread(target=data_collector, args=df,humidity,temp,soil_moisture,LDR,wait_time,)
 
-
+t1.start()
+time.sleep(5)
+t3.start()
+time.sleep(5)
+t2.start()
+time.sleep(15)
+print(humidity,temp,soil_moisture,wait_time,ldr)
+time.sleep(5)
+data_collector(df,humidity,temp,soil_moisture,ldr,wait_time)
 
 
 
