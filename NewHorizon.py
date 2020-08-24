@@ -30,17 +30,17 @@ GPIO.setup(6, GPIO.OUT)
 soil_moisture = 75 
 wait_time = 3
 humidity = 30
-
-
+temp = 0
+ldr = 0
 #collector
 start_data = {"Date":["0"],"Temperature":["0"],"Soil Moisture":["0"],"Humidity":["0"],"LDR":["0"],"Pump":["0"]}
 df = pandas.DataFrame(data=start_data,columns=["Date","Temperature","Soil Moisture","Humidity","LDR","Pump"])
 
 def dht():
-    global humidity
-    global temp
-
     while True:
+        global humidity
+        global temp
+
 
         result = instance.read()
         if result.temperature == 0:
@@ -51,10 +51,11 @@ def dht():
         time.sleep(5)
 
     
-def converter(wait_time):
-    global soil_moisture
+def converter():
     while True:
-        
+        global soil_moisture
+        global wait_time
+            
 
         bus.write_byte(address,A2) #A2 İnput soil moisture
         value = bus.read_byte(address)
@@ -62,24 +63,32 @@ def converter(wait_time):
         time.sleep(wait_time)
 
         global ldr
-        bus.write_byte(address,A0)#LDR input
-        ldr = bus.read_byte(address)
-
-def water_pump(soil_moisture):
-    global wait_time
+        #bus.write_byte(address,A0) LDR input broke
+        ldr = bus.read_byte(address) # incorrect
+def water_pump():
     while True:
+        global soil_moisture
+        global wait_time
         if soil_moisture < 60:
             wait_time = 0.1
             GPIO.output(5, GPIO.HIGH)
             GPIO.output(6, GPIO.LOW)
-            if soil_moisture > 75:
-                GPIO.output(5, GPIO.LOW)
-                GPIO.output(6, GPIO.LOW)
-                wait_time = 3
+        elif soil_moisture > 75:
+            GPIO.output(5, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
+            wait_time = 3
 
 
-def data_collector(df,humidity,temp,soil_moisture,ldr,wait_time):
+def data_collector(df):
     while True:
+        global humidity
+        global temp
+        global soil_moisture
+        global ldr
+        global wait_time
+
+
+
         now = datetime.datetime.now()
         date = datetime.datetime.strftime(now,'%x %X')
         if wait_time == 0.1:
@@ -89,7 +98,7 @@ def data_collector(df,humidity,temp,soil_moisture,ldr,wait_time):
 
 
         dataset = {"Date":[date],"Temperature":[temp],"Soil Moisture":[soil_moisture],"Humidity":[humidity],"LDR":[ldr],"Pump":[pump_key]}
-        
+            
         df2 = pandas.DataFrame(data=dataset,columns=["Date","Temperature","Soil Moisture","Humidity","LDR","Pump"])
         df = pandas.concat([df,df2])
         df.to_csv("dataset.cvs")
@@ -97,19 +106,16 @@ def data_collector(df,humidity,temp,soil_moisture,ldr,wait_time):
         time.sleep(10)
 
 t1 = threading.Thread(target=dht)
-t3 = threading.Thread(target=water_pump, args=(soil_moisture,))
-t2 = threading.Thread(target=converter, args= (wait_time,))
-t4 = threading.Thread(target=data_collector, args=(df,humidity,temp,soil_moisture,ldr,wait_time,))
+t3 = threading.Thread(target=water_pump)
+t2 = threading.Thread(target=converter)
+t4 = threading.Thread(target=data_collector, args=(df,))
 
 t1.start()
-time.sleep(5)
+time.sleep(6)
 t3.start()
 time.sleep(5)
 t2.start()
 time.sleep(15)
-print(humidity,temp,soil_moisture,wait_time,ldr)
+t4.start()
 time.sleep(5)
-data_collector(df,humidity,temp,soil_moisture,ldr,wait_time)
-
-
 
