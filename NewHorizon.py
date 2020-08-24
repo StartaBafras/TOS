@@ -97,9 +97,9 @@ def data_collector(df,humidity,temp,soil_moisture,ldr,wait_time):
         time.sleep(10)
 
 t1 = threading.Thread(target=dht)
-t3 = threading.Thread(target=water_pump, args=soil_moisture,)
-t2 = threading.Thread(target=converter, args= wait_time,)
-#t4 = threading.Thread(target=data_collector, args=df,humidity,temp,soil_moisture,LDR,wait_time,)
+t3 = threading.Thread(target=water_pump, args=(soil_moisture,))
+t2 = threading.Thread(target=converter, args= (wait_time,))
+t4 = threading.Thread(target=data_collector, args=(df,humidity,temp,soil_moisture,ldr,wait_time,))
 
 t1.start()
 time.sleep(5)
