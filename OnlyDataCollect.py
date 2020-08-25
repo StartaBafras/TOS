@@ -7,8 +7,7 @@ import dht11
 import numpy as np
 
 
-now = datetime.datetime.now()
-tarih = datetime.datetime.strftime(now,'%x %X')
+
 
 GPIO.setwarnings(True)
 GPIO.setmode(GPIO.BCM)
@@ -51,17 +50,3 @@ while True:
     time.sleep(10)
 
 
-#Vr = 3*3 * float(value) / 255
-#Rt = 10000 * Vr / (5 - Vr)
-#temp = 1/(((math.log(Rt / 10000)) / 3950) + (1 / (273.15+35)))
-#temp = temp - 273.15
-#GPIO.cleanup()
-#GPIO.setmode(GPIO.BCM)
-#GPIO.setup(5, GPIO.OUT)
-#GPIO.setup(6, GPIO.OUT)
-#GPIO.output(5, GPIO.HIGH)
-#GPIO.output(6, GPIO.LOW)
-#time.sleep(5)
-#GPIO.output(5, GPIO.LOW)
-#GPIO.output(6, GPIO.LOW)
-#time.sleep(4)
