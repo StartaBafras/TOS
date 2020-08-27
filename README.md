@@ -10,4 +10,4 @@ L9110 Motor Controller,
 PCF8591T A/D Converter,
 Soil Moisture Sensor,
 DHT11 Tempereture and Moisture sensor,
-Mini Water Pump,
+Mini Water Pump
