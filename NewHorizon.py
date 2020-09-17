@@ -50,7 +50,12 @@ def dht():
             humidity = "%" + str(result.humidity)
         time.sleep(5)
 
-    
+def ADCldr(): #Experimently
+    global ldr
+    bus.write_byte(address,A0)
+    value = bus.read_byte(address)
+    ldr = (250.000000/(value*0.012890625))-50.000000
+
 def converter():
     while True:
         global soil_moisture
@@ -62,9 +67,7 @@ def converter():
         soil_moisture = 100-(value*100/255)
         time.sleep(wait_time)
 
-        global ldr
-        #bus.write_byte(address,A0) LDR input broke
-        ldr = bus.read_byte(address) # incorrect
+        ldr()
 def water_pump():
     while True:
         global soil_moisture
@@ -104,6 +107,11 @@ def data_collector(df):
         df.to_csv("dataset.cvs")
         del dataset
         time.sleep(10)
+
+
+
+
+
 
 t1 = threading.Thread(target=dht)
 t3 = threading.Thread(target=water_pump)
