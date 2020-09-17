@@ -67,7 +67,7 @@ def converter():
         soil_moisture = 100-(value*100/255)
         time.sleep(wait_time)
 
-        ldr()
+        ADCldr()
 def water_pump():
     while True:
         global soil_moisture
