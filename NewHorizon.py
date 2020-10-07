@@ -50,11 +50,6 @@ def dht():
             humidity =  str(result.humidity)
         time.sleep(5)
 
-def ADCldr(): #Experimently
-    global ldr
-    bus.write_byte(address,A0)
-    value = bus.read_byte(address)
-    ldr = (250.000000/(value*0.012890625))-50.000000
 
 def ADCsm():
         global soil_moisture
@@ -70,7 +65,6 @@ def converter():
     while True:
         ADCsm()
         time.sleep(wait_time)
-        ADCldr()
 def water_pump():
     while True:
         global soil_moisture
