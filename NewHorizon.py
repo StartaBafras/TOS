@@ -33,8 +33,8 @@ humidity = 30
 temp = 0
 ldr = 0
 #collector
-start_data = {"Date":["0"],"Temperature":["0"],"Soil Moisture":["0"],"Humidity":["0"],"LDR":["0"],"Pump":["0"]}
-df = pandas.DataFrame(data=start_data,columns=["Date","Temperature","Soil Moisture","Humidity","LDR","Pump"])
+start_data = {"Date":["0"],"Temperature(°C)":["0"],"Soil Moisture(%)":["0"],"Humidity(%)":["0"],"LDR(Lux)":["0"],"Pump":["0"]}
+df = pandas.DataFrame(data=start_data,columns=["Date","Temperature(°C)","Soil Moisture(%)","Humidity(%)","LDR(Lux)","Pump"])
 
 def dht():
     while True:
@@ -46,8 +46,8 @@ def dht():
         if result.temperature == 0:
             result = instance.read()
         else:
-            temp = str(result.temperature) + "C"
-            humidity = "%" + str(result.humidity)
+            temp = str(result.temperature) 
+            humidity =  str(result.humidity)
         time.sleep(5)
 
 def ADCldr(): #Experimently
@@ -56,8 +56,7 @@ def ADCldr(): #Experimently
     value = bus.read_byte(address)
     ldr = (250.000000/(value*0.012890625))-50.000000
 
-def converter():
-    while True:
+def ADCsm():
         global soil_moisture
         global wait_time
             
@@ -65,8 +64,12 @@ def converter():
         bus.write_byte(address,A2) #A2 İnput soil moisture
         value = bus.read_byte(address)
         soil_moisture = 100-(value*100/255)
-        time.sleep(wait_time)
 
+
+def converter():
+    while True:
+        ADCsm()
+        time.sleep(wait_time)
         ADCldr()
 def water_pump():
     while True:
@@ -100,9 +103,9 @@ def data_collector(df):
             pump_key = 0
 
 
-        dataset = {"Date":[date],"Temperature":[temp],"Soil Moisture":[soil_moisture],"Humidity":[humidity],"LDR":[ldr],"Pump":[pump_key]}
+        dataset = {"Date":[date],"Temperature(°C)":[temp],"Soil Moisture(%)":[soil_moisture],"Humidity(%)":[humidity],"LDR(Lux)":[ldr],"Pump":[pump_key]}
             
-        df2 = pandas.DataFrame(data=dataset,columns=["Date","Temperature","Soil Moisture","Humidity","LDR","Pump"])
+        df2 = pandas.DataFrame(data=dataset,columns=["Date","Temperature(°C)","Soil Moisture(%)","Humidity(%)","LDR(Lux)","Pump"])
         df = pandas.concat([df,df2])
         df.to_csv("dataset.cvs")
         del dataset
